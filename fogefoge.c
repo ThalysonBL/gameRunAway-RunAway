@@ -1,44 +1,94 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "fogefoge.h"
+#include "mapa.c"
 
 // declarando matriz 5 x 10
-char **mapa; //mapa[][]
-int linhas;
-int colunas;
+// char **mapa; // mapa[][]
+// int linhas;
+// int colunas;
+MAPA m;
+POSICAO heroi;
+
+void fantasmas()
+{
+  MAPA copia;
+
+  copiamapa(&copia, &m);
+  for (int i = 0; i < m.linhas; i++)
+  {
+    for (int j = 0; j < m.colunas; j++)
+    {
+      if (copia.matriz[i][j] == FANTASMA)
+      {
+        if (ehvalida(&m, i, j + 1) && ehvazia(&m, i, j + 1))
+        {
+          andanomapa(&m, i, j, i, j + 1);
+        }
+      }
+    }
+    liberamapa(&copia);
+  }
+}
+
+int acabou()
+{
+  return 0;
+}
+
+int ehdirecao(char direcao)
+{
+  return direcao == 'a' ||
+         direcao == 'w' ||
+         direcao == 's' ||
+         direcao == 'd';
+}
+
+void move(char direcao)
+{
+  if (!ehdirecao(direcao))
+    return;
+  int proximox = heroi.x;
+  int proximoy = heroi.y;
+
+  switch (direcao)
+  {
+  case ESQUERDA:
+    proximoy--;
+    break;
+  case CIMA:
+    proximox--;
+    break;
+  case BAIXO:
+    proximox++;
+    break;
+  case DIREITA:
+    proximoy++;
+    break;
+  }
+  if (!ehvalida(&m, proximox, proximoy))
+    return;
+  if (!ehvazia(&m, proximox, proximoy))
+    return;
+
+  andanomapa(&m, heroi.x, heroi.y, proximox, proximoy);
+  heroi.x = proximox;
+  heroi.y = proximoy;
+}
 
 int main()
 {
-  FILE *f;
-  f = fopen("mapa.txt", "r");
+  lemapa(&m);
+  encontramapa(&m, &heroi, HEROI);
 
-  if (f == 0)
+  do
   {
-    printf("Erro na leitura do mapa\n");
-    exit(1);
-  }
-  fscanf(f, "%d %d", &linhas, &colunas);
+    imprimemapa(&m);
+    char comando;
+    scanf(" %c", &comando); // damos um espaço no scanf para não pegar a tecla enter como valor
+    move(comando);
+    fantasmas();
+  } while (!acabou());
 
-  mapa = malloc(sizeof(char *) * linhas); // sizeof pega o tamanho do char (cada sistema pode ter um tamanho diferente do char, esse comando pega dinamicamente)
-
-  for (int i = 0; i < linhas; i++)
-  {
-    mapa[i] = malloc(sizeof(char *) * (colunas + 1)); // char é um ponteiro
-  }
-
-  for (int i = 0; i < 5; i++)
-  {
-    fscanf(f, "%s", mapa[i]);
-  }
-
-  for (int i = 0; i < 5; i++)
-  {
-    printf("%s\n", mapa[i]);
-  }
-  fclose(f);
-
-  for (int i = 0; i < linhas; i++)
-  {
-    free(mapa[i]); // ao acabar o programa precisamos liberar a memoria
-  }
-  free(mapa);
+  liberamapa(&m);
 }
