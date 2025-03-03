@@ -37,7 +37,7 @@ int ehvazia(MAPA *m, int x, int y)
   return m->matriz[x][y] == VAZIO;
 }
 
-void encontramapa(MAPA *m, POSICAO *p, char c)
+int encontramapa(MAPA *m, POSICAO *p, char c)
 {
   for (int i = 0; i < m->linhas; i++)
   {
@@ -47,10 +47,40 @@ void encontramapa(MAPA *m, POSICAO *p, char c)
       {
         p->x = i;
         p->y = j;
-        break;
+        return 1;
       }
     }
   }
+  return 0;
+}
+
+int ehparede(MAPA *m, int x, int y)
+{
+  return m->matriz[x][y] == PAREDE_VERTICAL ||
+         m->matriz[x][y] == PAREDE_HORIZONTAL;
+}
+
+int ehpersonagem(MAPA *m, char personagem, int x, int y)
+{
+  return m->matriz[x][y] == personagem;
+}
+
+// int podeandar(MAPA *m, char personagem, int x, int y)
+// {
+//   return ehvalida(m, x, y) && ehvazia(m, x, y) && !ehpersonagem(m, personagem, x, y);
+// }
+int podeandar(MAPA *m, char personagem, int x, int y)
+{
+  if (!ehvalida(m, x, y) || ehparede(m, x, y))
+    return 0;
+
+  if (personagem == HEROI)
+    return ehvazia(m, x, y) || m->matriz[x][y] == FANTASMA; // Herói pode andar para espaços vazios ou onde há fantasmas.
+
+  if (personagem == FANTASMA)
+    return ehvazia(m, x, y) || m->matriz[x][y] == HEROI; // Fantasmas podem andar para espaços vazios ou onde está o herói.
+
+  return 0;
 }
 
 void liberamapa(MAPA *m)
