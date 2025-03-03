@@ -1,11 +1,44 @@
 #include <stdio.h>
+#include <stdlib.h>
+
+// declarando matriz 5 x 10
+char **mapa; //mapa[][]
+int linhas;
+int colunas;
 
 int main()
 {
-  // declarando matriz 5 x 10
-  char mapa[5][10];
-  mapa[0][0] = '|';
-  mapa[4][9] = '@';
+  FILE *f;
+  f = fopen("mapa.txt", "r");
 
-  printf("%c %c\n", mapa[0][0], mapa[4][9]);
+  if (f == 0)
+  {
+    printf("Erro na leitura do mapa\n");
+    exit(1);
+  }
+  fscanf(f, "%d %d", &linhas, &colunas);
+
+  mapa = malloc(sizeof(char *) * linhas); // sizeof pega o tamanho do char (cada sistema pode ter um tamanho diferente do char, esse comando pega dinamicamente)
+
+  for (int i = 0; i < linhas; i++)
+  {
+    mapa[i] = malloc(sizeof(char *) * (colunas + 1)); // char é um ponteiro
+  }
+
+  for (int i = 0; i < 5; i++)
+  {
+    fscanf(f, "%s", mapa[i]);
+  }
+
+  for (int i = 0; i < 5; i++)
+  {
+    printf("%s\n", mapa[i]);
+  }
+  fclose(f);
+
+  for (int i = 0; i < linhas; i++)
+  {
+    free(mapa[i]); // ao acabar o programa precisamos liberar a memoria
+  }
+  free(mapa);
 }
