@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "fogefoge.h"
-#include "mapa.c"
+#include "ui.h"
 
 // declarando matriz 5 x 10
 // char **mapa; // mapa[][]
@@ -110,28 +110,33 @@ void move(char direcao)
   heroi.y = proximoy;
 }
 
-void explodepilula() //direcoes
+void explodepilula() // direcoes
 {
+  if (!tempilula)
+    return;
   explodepilula2(heroi.x, heroi.y, 0, 1, 3);
   explodepilula2(heroi.x, heroi.y, 0, -1, 3);
   explodepilula2(heroi.x, heroi.y, 1, 0, 3);
   explodepilula2(heroi.x, heroi.y, -1, 0, 3);
+
+  tempilula = 0;
 }
 
 void explodepilula2(int x, int y, int somax, int somay, int qtd) // recursive
 {
+  printf("chegou aqui %d\n", qtd);
   if (qtd == 0)
     return;
 
   int novox = x + somax;
   int novoy = y + somay;
-  if (!ehvalida(&m, novox, novoy + 1))
+  if (!ehvalida(&m, novox, novoy))
     return;
-  if (ehparede(&m, novox, novoy + 1))
+  if (ehparede(&m, novox, novoy))
     return;
 
-  m.matriz[novox][novoy + 1] = VAZIO;
-  explodepilula(novox, novoy, qtd - 1);
+  m.matriz[novox][novoy] = VAZIO;
+  explodepilula2(novox, novoy, somax, somay, qtd - 1);
 }
 
 int main()
